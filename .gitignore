@@ -1,0 +1,41 @@
+# Nuxt
+.nuxt
+.output
+.vercel
+dist
+
+# Node
+node_modules
+.npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store
+
+# Env
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+*.local
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Cache
+.cache
+.parcel-cache
+
+.agents
+
+skill-lock.json
