@@ -97,6 +97,25 @@ export default defineNuxtConfig({
   },
   nitro: {
     preset: 'vercel-static',
+    prerender: {
+      crawlLinks: true,
+      routes: [
+        '/',
+        '/chapter/chapter-i',
+        '/chapter/chapter-ii',
+        '/chapter/chapter-iii',
+        '/chapter/chapter-iv',
+        '/chapter/chapter-v',
+        '/chapter/chapter-vi',
+        '/chapter/chapter-vii',
+        '/chapter/chapter-viii',
+        '/schedules',
+      ],
+    },
+  },
+  routeRules: {
+    '/chapter/**': { prerender: true },
+    '/schedules': { prerender: true },
   },
   compatibilityDate: '2024-11-01',
 })
