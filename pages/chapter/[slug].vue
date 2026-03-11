@@ -4,15 +4,11 @@ import { CHAPTERS, getAdjacentChapters } from '~/lib/chapters'
 import { useChapterMeta } from '~/composables/useChapterMeta'
 import { useSearch } from '~/composables/useSearch'
 
-definePageMeta({
-  key: route => route.fullPath,
-})
-
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
 const { data: doc } = await useAsyncData(
-  `chapter-${slug.value}`,
+  () => `chapter-${slug.value}`,
   () => queryContent(slug.value).findOne(),
   { watch: [slug] }
 )
@@ -75,83 +71,115 @@ defineOgImageComponent('Constitution', {
 </script>
 
 <template>
-  <div style="max-width: 1100px; margin: 0 auto; padding: 0 1.5rem;">
-    <div style="display: flex; gap: 3rem; padding: 3rem 0;">
+  <div class="page-wrap">
+    <article class="article-body">
 
-      <aside class="hidden lg:block" style="width: 200px; flex-shrink: 0;">
-        <TableOfContents v-if="toc.length" :links="toc" />
-      </aside>
-
-      <article style="flex: 1; min-width: 0; max-width: 720px;">
-
-        <div style="margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border);">
-          <span
-            style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); display: block; margin-bottom: 0.75rem;"
-          >
-            {{ chapter?.label }}
-          </span>
-          <h1
-            style="font-family: 'Instrument Serif', Georgia, serif; font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 400; color: var(--text-primary); line-height: 1.15; margin: 0 0 1rem;"
-          >
-            {{ title }}
-          </h1>
-          <div style="display: flex; align-items: center; gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text-muted);">
-            <span>{{ sectionCount }} sections</span>
-            <span>·</span>
-            <span>~{{ readTime }} min read</span>
-            <span v-if="toc.length" class="lg:hidden" style="margin-left: auto;">
-              <button class="toc-open-btn" @click="tocOpen = true">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="16" y2="12"/><line x1="3" y1="18" x2="11" y2="18"/>
-                </svg>
-                Contents
-              </button>
-            </span>
-          </div>
+      <div class="chapter-header">
+        <span class="chapter-label-accent">{{ chapter?.label }}</span>
+        <h1 class="chapter-title">{{ title }}</h1>
+        <div class="chapter-meta">
+          <span>{{ sectionCount }} sections</span>
+          <span>·</span>
+          <span>~{{ readTime }} min read</span>
+          <button v-if="toc.length" class="toc-trigger" @click="tocOpen = true">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="16" y2="12"/><line x1="3" y1="18" x2="11" y2="18"/>
+            </svg>
+            Contents
+          </button>
         </div>
+      </div>
 
-        <SearchBar
-          :model-value="query"
-          :match-count="matchCount"
-          :current-index="currentIndex"
-          @update:model-value="search"
-          @search="search"
-          @enter="jumpToFirst"
-          @next="goNext"
-          @prev="goPrev"
-          @clear="clearSearch"
-        />
+      <SearchBar
+        :model-value="query"
+        :match-count="matchCount"
+        :current-index="currentIndex"
+        @update:model-value="search"
+        @search="search"
+        @enter="jumpToFirst"
+        @next="goNext"
+        @prev="goPrev"
+        @clear="clearSearch"
+      />
 
-        <div class="prose-content">
-          <ContentRenderer v-if="doc" :value="doc" />
-        </div>
+      <div class="prose-content">
+        <ContentRenderer v-if="doc" :value="doc" />
+      </div>
 
-        <ChapterNav :prev="adjacent.prev" :next="adjacent.next" />
-      </article>
+      <ChapterNav :prev="adjacent.prev" :next="adjacent.next" />
+    </article>
 
-      <div class="hidden xl:block" style="width: 160px; flex-shrink: 0;" />
+    <div v-if="toc.length" class="toc-fixed">
+      <TableOfContents :links="toc" />
     </div>
   </div>
 
-  <Teleport to="body">
-    <div v-if="tocOpen" class="toc-backdrop" @click.self="tocOpen = false">
-      <div class="toc-drawer">
-        <div class="toc-drawer-head">
-          <span class="toc-drawer-title">Contents</span>
-          <button class="toc-drawer-close" @click="tocOpen = false">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 6 6 18M6 6l12 12"/>
-            </svg>
-          </button>
+  <ClientOnly>
+    <Teleport to="body">
+      <div v-if="tocOpen" class="toc-overlay" @click.self="tocOpen = false">
+        <div class="toc-panel">
+          <div class="toc-panel-head">
+            <span class="toc-panel-label">Contents</span>
+            <button class="toc-panel-close" @click="tocOpen = false">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6 6 18M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+          <TableOfContents :links="toc" />
         </div>
-        <TableOfContents v-if="toc.length" :links="toc" />
       </div>
-    </div>
-  </Teleport>
+    </Teleport>
+  </ClientOnly>
 </template>
 
 <style scoped>
-.toc-open-btn {
+.page-wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+.article-body {
+  width: 100%;
+}
+
+.chapter-header {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.chapter-label-accent {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.chapter-title {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 400;
+  color: var(--text-primary);
+  line-height: 1.15;
+  margin: 0 0 1rem;
+}
+
+.chapter-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+}
+
+.toc-trigger {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -161,15 +189,38 @@ defineOgImageComponent('Constitution', {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 5px 10px;
+  padding: 4px 10px;
   cursor: pointer;
+  margin-left: auto;
   transition: border-color 150ms ease, color 150ms ease;
 }
-.toc-open-btn:hover {
+
+.toc-trigger:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
-.toc-backdrop {
+
+.toc-fixed {
+  display: none;
+  position: fixed;
+  top: 5rem;
+  left: max(1rem, calc(50vw - 380px - 230px));
+  width: 210px;
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
+  z-index: 20;
+}
+
+@media (min-width: 1360px) {
+  .toc-fixed {
+    display: block;
+  }
+  .toc-trigger {
+    display: none;
+  }
+}
+
+.toc-overlay {
   position: fixed;
   inset: 0;
   z-index: 200;
@@ -177,7 +228,8 @@ defineOgImageComponent('Constitution', {
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
 }
-.toc-drawer {
+
+.toc-panel {
   position: fixed;
   top: 0;
   right: 0;
@@ -191,7 +243,8 @@ defineOgImageComponent('Constitution', {
   flex-direction: column;
   gap: 1rem;
 }
-.toc-drawer-head {
+
+.toc-panel-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -199,14 +252,16 @@ defineOgImageComponent('Constitution', {
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
-.toc-drawer-title {
+
+.toc-panel-label {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--text-muted);
 }
-.toc-drawer-close {
+
+.toc-panel-close {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -219,7 +274,8 @@ defineOgImageComponent('Constitution', {
   cursor: pointer;
   transition: border-color 150ms ease, color 150ms ease;
 }
-.toc-drawer-close:hover {
+
+.toc-panel-close:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
