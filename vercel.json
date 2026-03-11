@@ -1,7 +1,5 @@
 {
   "buildCommand": "pnpm generate",
-  "outputDirectory": ".vercel/output/static",
-  "devCommand": "pnpm dev",
   "installCommand": "pnpm install",
-  "framework": "nuxtjs"
+  "framework": null
 }
