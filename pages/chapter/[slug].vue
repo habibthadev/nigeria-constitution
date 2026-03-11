@@ -4,12 +4,17 @@ import { CHAPTERS, getAdjacentChapters } from '~/lib/chapters'
 import { useChapterMeta } from '~/composables/useChapterMeta'
 import { useSearch } from '~/composables/useSearch'
 
+definePageMeta({
+  key: route => route.fullPath,
+})
+
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
 const { data: doc } = await useAsyncData(
-  () => `chapter-${slug.value}`,
-  () => queryContent(slug.value).findOne()
+  `chapter-${slug.value}`,
+  () => queryContent(slug.value).findOne(),
+  { watch: [slug] }
 )
 
 const chapter = computed(() => CHAPTERS.find((c) => c.slug === slug.value))
