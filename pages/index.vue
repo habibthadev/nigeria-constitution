@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { CHAPTERS, getChapterRoute } from '~/lib/chapters'
 
-const { data: chapters } = await useAsyncData('all-chapters', () =>
+const { data: chapters } = useAsyncData('all-chapters', () =>
   queryContent('/').find()
 )
 

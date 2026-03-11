@@ -4,7 +4,7 @@ import { CHAPTERS, getAdjacentChapters } from '~/lib/chapters'
 import { useChapterMeta } from '~/composables/useChapterMeta'
 import { useSearch } from '~/composables/useSearch'
 
-const { data: doc } = await useAsyncData('schedules', () =>
+const { data: doc } = useAsyncData('schedules', () =>
   queryContent('schedules').findOne()
 )
 

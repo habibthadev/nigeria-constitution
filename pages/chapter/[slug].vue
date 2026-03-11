@@ -1,24 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { CHAPTERS, getAdjacentChapters } from '~/lib/chapters'
 import { useChapterMeta } from '~/composables/useChapterMeta'
 import { useSearch } from '~/composables/useSearch'
 
-definePageMeta({
-  key: route => route.fullPath,
-})
-
 const route = useRoute()
-const slug = computed(() => route.params.slug as string)
 
-const { data: doc } = await useAsyncData(
-  `chapter-${route.params.slug}`,
-  () => queryContent(slug.value).findOne()
+const { data: doc } = useAsyncData(
+  () => `chapter-${route.params.slug}`,
+  () => queryContent(route.params.slug as string).findOne()
 )
 
-const chapter = computed(() => CHAPTERS.find((c) => c.slug === slug.value))
+const chapter = computed(() => CHAPTERS.find((c) => c.slug === route.params.slug))
 const { title, sectionCount, readTime } = useChapterMeta(doc)
-const adjacent = computed(() => getAdjacentChapters(slug.value))
+const adjacent = computed(() => getAdjacentChapters(route.params.slug as string))
 const toc = computed(() => doc.value?.body?.toc?.links ?? [])
 const tocOpen = ref(false)
 
@@ -47,6 +42,11 @@ function extractText(node: any): string {
 }
 
 const { query, matchCount, currentIndex, search, goNext, goPrev, jumpToFirst, clearSearch } = useSearch(sections)
+
+watch(() => route.params.slug, () => {
+  clearSearch()
+  tocOpen.value = false
+})
 
 const chapterLabel = computed(() => chapter.value?.label ?? '')
 const pageTitle = computed(() =>
