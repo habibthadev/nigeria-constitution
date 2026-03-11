@@ -4,13 +4,16 @@ import { CHAPTERS, getAdjacentChapters } from '~/lib/chapters'
 import { useChapterMeta } from '~/composables/useChapterMeta'
 import { useSearch } from '~/composables/useSearch'
 
+definePageMeta({
+  key: route => route.fullPath,
+})
+
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
 const { data: doc } = await useAsyncData(
-  () => `chapter-${slug.value}`,
-  () => queryContent(slug.value).findOne(),
-  { watch: [slug] }
+  `chapter-${route.params.slug}`,
+  () => queryContent(slug.value).findOne()
 )
 
 const chapter = computed(() => CHAPTERS.find((c) => c.slug === slug.value))
@@ -79,7 +82,7 @@ defineOgImageComponent('Constitution', {
         <h1 class="chapter-title">{{ title }}</h1>
         <div class="chapter-meta">
           <span>{{ sectionCount }} sections</span>
-          <span>·</span>
+          <span>&middot;</span>
           <span>~{{ readTime }} min read</span>
           <button v-if="toc.length" class="toc-trigger" @click="tocOpen = true">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
