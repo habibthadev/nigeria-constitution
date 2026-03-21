@@ -85,6 +85,7 @@ export default defineNuxtConfig({
         { property: 'og:type', content: 'website' },
         { name: 'twitter:card', content: 'summary_large_image' },
         { name: 'theme-color', content: '#0a0a09' },
+{ name: 'google-site-verification', content: '2cGQ9C4B5g_etd3i0z5rebyn0NfwDDjp-f_qS9y2wCw' },
       ],
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
